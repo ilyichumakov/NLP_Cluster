@@ -70,6 +70,11 @@ def getLesson(id):
 
 def writeCourseToFile(target, course):
     name = re.sub("[\?\\/!:\*<>\|\"]", "_", course["title"])
+    cleanr = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+    course["summary"] = re.sub(cleanr, '', course["summary"])
+    course["target_audience"] = re.sub(cleanr, '', course["target_audience"])
+    course["title"] = re.sub(cleanr, '', course["title"])
+    course["description"] = re.sub(cleanr, '', course["description"])
 
     needFileds = [
         "id",
