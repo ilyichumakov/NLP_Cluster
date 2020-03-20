@@ -53,6 +53,21 @@ def retrieveCourseJSON(path):
 
     return data
 
+def getSection(id):
+    request = requests.get("https://stepik.org:443/api/sections/" + str(id))
+    body = request.json()["sections"]
+    return body
+
+def getUnit(id):
+    request = requests.get("https://stepik.org:443/api/units/" + str(id))
+    body = request.json()["units"]
+    return body
+
+def getLesson(id):
+    request = requests.get("https://stepik.org:443/api/lessons/" + str(id))
+    body = request.json()["lessons"]
+    return body
+
 def writeCourseToFile(target, course):
     name = re.sub("[\?\\/!:\*<>\|\"]", "_", course["title"])
 
