@@ -1,7 +1,7 @@
 import requests
 import os
 import re
-
+import json
 
 def getCourseList():
     request = requests.get("https://stepik.org:443/api/course-lists")
@@ -12,26 +12,84 @@ def getCourseList():
 
     return clist
 
+def getUser(id):
+    request = requests.get("https://stepik.org:443/api/users/" + str(id))
+    body = request.json()["users"][0]
+    return body
+
+def retrieveUserValuableInfo(user):
+    useful = [
+        "details",
+        "first_name",
+        "last_name",
+        "short_bio",
+        "city"
+    ]
+
+    res = {}
+
+    for key in useful:
+        res[key] = user[key]
+
+    return res
+
 def getCourseInfo(courseId):
     request = requests.get("https://stepik.org:443/api/courses/" + str(courseId))
     body = request.json()["courses"][0]
-    return {'title': body["title"], 'target_audience': body["target_audience"], 'authors': body["authors"], 'description': body["description"]}
+    return body
 
 def getNextPage(page):
-    request = requests.get("https://stepik.org:443/api/courses?page=" + str(page))
+    request = requests.get("https://stepik.org:443/api/courses?language=ru&page=" + str(page))
     courses = request.json()["courses"]
     return {'meta': request.json()["meta"], 'courses': courses}
 
+def retrieveCourseJSON(path):
+    data = {}
+    try:
+        with open(path) as json_file:
+            data = json.load(json_file)
+    except:
+        print("error opening " + path + " as JSON")
+
+    return data
+
 def writeCourseToFile(target, course):
     name = re.sub("[\?\\/!:\*<>\|\"]", "_", course["title"])
-    f = open(os.path.join(target, name + ".txt"), "w", encoding="utf-8")
-    f.write(course["title"] + "\n")
-    f.write(course["target_audience"] + "\n")
-    cleanr = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
-    cleanDescription = re.sub(cleanr, '', course["description"])
-    #f.write(course["description"] + "\n")
-    f.write(cleanDescription + "\n")
-    f.close()
+
+    needFileds = [
+        "id",
+        "summary",
+        "target_audience",
+        "requirements",
+        "description",
+        "sections",
+        "authors",
+        "learners_count",
+        "is_popular",
+        "title",
+        "slug"
+    ]
+
+    try:
+        
+        info = {}
+        for key in needFileds:
+            info[key] = course[key]
+
+        users = []
+
+        if "authors" in info:
+            for userId in info["authors"]:
+                users.append(retrieveUserValuableInfo(getUser(userId)))
+
+            info["authors"] = users
+
+        with open(os.path.join(target, name + ".json"), 'w') as outfile:
+            json.dump(info, outfile)
+
+    except:
+        print(name + " occured an error, skipped\n")
+
     return True
 
 def loadCoursesByGroups(targetPath):
