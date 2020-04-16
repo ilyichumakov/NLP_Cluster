@@ -43,16 +43,6 @@ def getNextPage(page):
     courses = request.json()["courses"]
     return {'meta': request.json()["meta"], 'courses': courses}
 
-def retrieveCourseJSON(path):
-    data = {}
-    try:
-        with open(path) as json_file:
-            data = json.load(json_file)
-    except:
-        print("error opening " + path + " as JSON")
-
-    return data
-
 def getSection(id):
     request = requests.get("https://stepik.org:443/api/sections/" + str(id))
     body = request.json()["sections"]
