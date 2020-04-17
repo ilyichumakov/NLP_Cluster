@@ -144,17 +144,19 @@ def loadCoursesByGroups(targetPath):
 
     return "done"
 
-def loadAllCourses(targetPath):
+def loadAllCourses(targetPath, debug = False):
     k = 0
     page = getNextPage(1)
     while(page["meta"]["has_next"]):
         for course in page["courses"]:
             if writeCourseToFile(targetPath, course):
                 k += 1
-                if k % 50 == 0:
+                if debug and k % 50 == 0:
                     print("Записано", k, "курсов")
             
         page = getNextPage(page["meta"]["page"] + 1)
 
-    return "done"
+    return "download finished"
 
+# example:
+# loadAllCourses("D:/Третий курс/ФЛП/КР/степик/allRelevant/")

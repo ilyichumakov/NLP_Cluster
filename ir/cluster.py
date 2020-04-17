@@ -8,14 +8,12 @@ from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
 import pickle
 
-root = "D:/Третий курс/ФЛП/КР/степик"
-
-def clusterAndWrite(root, rewrite = False):
-    if not os.path.exists(os.path.join(root, "tfidf.pickle")) or rewrite:
+def clusterAndWrite(root, tfidf_matrix = None, rewrite = False):
+    if not os.path.exists(os.path.join(root, "tfidf.pickle")) and tfidf_matrix is None:
         print("Матрица весов не определена в файле :(\nНаучите меня получать её другим образом либо замаринуйте с именем tfidf.pickle")
         exit(0)
-
-    tfidf_matrix = pickle.load(open(os.path.join(root, "tfidf.pickle"), "rb"))
+    elif tfidf_matrix is None:
+        tfidf_matrix = pickle.load(open(os.path.join(root, "tfidf.pickle"), "rb"))
 
     if not os.path.exists(os.path.join(root, "kMeans.pickle")) or rewrite:
         # K ближайших соседей
@@ -47,4 +45,20 @@ def clusterAndWrite(root, rewrite = False):
         answer = agglo1.fit_predict(tfidf_matrix.toarray())
         pickle.dump(answer, open(os.path.join(root, "AgglomerativeClustering.pickle"), "wb"))
 
-clusterAndWrite(root)
+    # from sklearn.metrics.pairwise import cosine_similarity
+    # dist = 1 - cosine_similarity(tfidf_matrix)
+      
+
+    # # PCA 3D
+    # from sklearn.decomposition import IncrementalPCA
+    # icpa = IncrementalPCA(n_components=3, batch_size=16)
+    # icpa.fit(dist)
+    # ddd = icpa.transform(dist)
+    # xs, ys, zs = ddd[:, 0], ddd[:, 1], ddd[:, 2]
+
+    return "clustering done"
+
+# examples:
+# clusterAndWrite("D:/Третий курс/ФЛП/КР/степик")
+# clusterAndWrite("D:/Третий курс/ФЛП/КР/степик", matrix) - matrix is an object of TfidfVectorizer.fit&|_transform method result
+# clusterAndWrite("D:/Третий курс/ФЛП/КР/степик", Null, True) - clusters will be overriden if exists

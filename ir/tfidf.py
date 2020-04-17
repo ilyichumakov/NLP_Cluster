@@ -4,9 +4,6 @@ import json
 import os
 import pickle
 
-stop_words = stopwords.words('russian')
-stop_words.extend(['что', 'это', 'так', 'вот', 'быть', 'как', 'в', '—', '–', 'к', 'на', '...'])
-
 def singleString(entity):
     res = ''
     if isinstance(entity, str):
@@ -44,26 +41,33 @@ def getCourseList(path):
             result.append(entity.path)
     return result
 
-root = "D:/Третий курс/ФЛП/КР/степик"
-if os.path.exists(os.path.join(root, "tfidf.pickle")):
-    tfidf_matrix = pickle.load(open(os.path.join(root, "tfidf.pickle"), "rb"))
-else:
-    files = getCourseList(os.path.join(root, "stemmed/"))
 
-    res = []
+def createMatrix(root):
+    stop_words = stopwords.words('russian')
+    stop_words.extend(['что', 'это', 'так', 'вот', 'быть', 'как', 'в', '—', '–', 'к', 'на', '...'])
 
-    for item in files:
-        res.append(retrieveCourseSingleString(item))
+    if os.path.exists(os.path.join(root, "tfidf.pickle")):
+        tfidf_matrix = pickle.load(open(os.path.join(root, "tfidf.pickle"), "rb"))
+    else:
+        files = getCourseList(os.path.join(root, "stemmed/"))
 
-    n_featur=200000
-    tfidf_vectorizer = TfidfVectorizer(
-        max_df=0.8, 
-        max_features=10000,
-        min_df=0.005, stop_words=stop_words,
-        use_idf=True, ngram_range=(1,3)
-    )
+        res = []
 
-    tfidf_matrix = tfidf_vectorizer.fit_transform(res)
-    pickle.dump(tfidf_matrix, open(os.path.join(root, "tfidf.pickle"), "wb"))
+        for item in files:
+            res.append(retrieveCourseSingleString(item))
 
-print(tfidf_matrix.shape)
+        n_featur=200000
+        tfidf_vectorizer = TfidfVectorizer(
+            max_df=0.8, 
+            max_features=10000,
+            min_df=0.005, stop_words=stop_words,
+            use_idf=True, ngram_range=(1,3)
+        )
+
+        tfidf_matrix = tfidf_vectorizer.fit_transform(res)
+        pickle.dump(tfidf_matrix, open(os.path.join(root, "tfidf.pickle"), "wb"))
+
+    return(tfidf_matrix)
+
+# example:
+# createMatrix("D:/Третий курс/ФЛП/КР/степик")

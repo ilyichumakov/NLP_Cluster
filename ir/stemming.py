@@ -48,32 +48,35 @@ def getCourseList(path):
             result.append(entity.path)
     return result
 
-root = "D:/Третий курс/ФЛП/КР/степик"
-targetRoot = os.path.join(root, "stemmed/")
+def stem(root, sourceInRoot, debug = False):
+    targetRoot = os.path.join(root, "stemmed/")
 
-courses = getCourseList(os.path.join(root, "allRelevant/"))
-k = 0
+    courses = getCourseList(os.path.join(root, sourceInRoot))
+    k = 0
 
-for path in courses:
-    course = retrieveCourseJSON(path)
-    name = path.split("/").pop()
-    stemmedCourse = {}
-    for key in course.keys():
-        if isinstance(course[key], str):
-            stemmedCourse[key] = token_and_stem(course[key])
-        elif isinstance(course[key], list):
-            stemmedCourse[key] = []
-            for item in course[key]:
-                if isinstance(item, str):
-                    stemmedCourse[key].append(token_and_stem(item))
-        else:
-            stemmedCourse[key] = course[key]
+    for path in courses:
+        course = retrieveCourseJSON(path)
+        name = path.split("/").pop()
+        stemmedCourse = {}
+        for key in course.keys():
+            if isinstance(course[key], str):
+                stemmedCourse[key] = token_and_stem(course[key])
+            elif isinstance(course[key], list):
+                stemmedCourse[key] = []
+                for item in course[key]:
+                    if isinstance(item, str):
+                        stemmedCourse[key].append(token_and_stem(item))
+            else:
+                stemmedCourse[key] = course[key]
 
-    with open(os.path.join(targetRoot, name), 'w') as outfile:
-        json.dump(stemmedCourse, outfile)
+        with open(os.path.join(targetRoot, name), 'w') as outfile:
+            json.dump(stemmedCourse, outfile)
 
-    k = k + 1
-    if k % 100 == 0:
-        print(k, "обработано")
+        k = k + 1
+        if debug and k % 100 == 0:
+            print(k, "обработано")
 
-print("done")
+    return "stemming done"
+
+# example:
+# stem("D:/Третий курс/ФЛП/КР/степик", "allRelevant/")
