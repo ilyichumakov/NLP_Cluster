@@ -8,7 +8,7 @@ from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
 import pickle
 
-def clusterAndWrite(root, tfidf_matrix = None, rewrite = False):
+def clusterAndWrite(root, tfidf_matrix = None, numOfClusters = 5, rewrite = False):
     if not os.path.exists(os.path.join(root, "tfidf.pickle")) and tfidf_matrix is None:
         print("Матрица весов не определена в файле :(\nНаучите меня получать её другим образом либо замаринуйте с именем tfidf.pickle")
         exit(0)
@@ -17,44 +17,33 @@ def clusterAndWrite(root, tfidf_matrix = None, rewrite = False):
 
     if not os.path.exists(os.path.join(root, "kMeans.pickle")) or rewrite:
         # K ближайших соседей
-        km = KMeans(n_clusters=10)
+        km = KMeans(n_clusters=numOfClusters)
         km.fit(tfidf_matrix)
-        clusters = km.labels_.tolist()
+        #clusters = km.labels_.tolist()
 
         pickle.dump(km, open(os.path.join(root, "kMeans.pickle"), "wb"))
 
     if not os.path.exists(os.path.join(root, "MiniBatchKMeans.pickle")) or rewrite:
         # MiniBatchKMeans
-        mbk = MiniBatchKMeans(init='random', n_clusters=10) #(init='k-means++', ‘random’ or an ndarray)
+        mbk = MiniBatchKMeans(init='random', n_clusters=numOfClusters) #(init='k-means++', ‘random’ or an ndarray)
         mbk.fit_transform(tfidf_matrix)
         mbk.fit(tfidf_matrix)
-        miniclusters = mbk.labels_.tolist()
+        #miniclusters = mbk.labels_.tolist()
 
         pickle.dump(mbk, open(os.path.join(root, "MiniBatchKMeans.pickle"), "wb"))
 
     if not os.path.exists(os.path.join(root, "DBSCAN.pickle")) or rewrite:
         # DBSCAN
-        db = DBSCAN(eps=0.3, min_samples=10).fit(tfidf_matrix)
-        labels = db.labels_
+        db = DBSCAN(eps=0.3, min_samples=numOfClusters).fit(tfidf_matrix)
+        #labels = db.labels_
 
         pickle.dump(db, open(os.path.join(root, "DBSCAN.pickle"), "wb"))
 
     if not os.path.exists(os.path.join(root, "AgglomerativeClustering.pickle")) or rewrite:
         # Аггломеративная класстеризация
-        agglo1 = AgglomerativeClustering(n_clusters=10, affinity='euclidean') #affinity можно выбрать любое или попробовать все по очереди: cosine, l1, l2, manhattan
+        agglo1 = AgglomerativeClustering(n_clusters=numOfClusters, affinity='euclidean') #affinity можно выбрать любое или попробовать все по очереди: cosine, l1, l2, manhattan
         answer = agglo1.fit_predict(tfidf_matrix.toarray())
         pickle.dump(answer, open(os.path.join(root, "AgglomerativeClustering.pickle"), "wb"))
-
-    # from sklearn.metrics.pairwise import cosine_similarity
-    # dist = 1 - cosine_similarity(tfidf_matrix)
-      
-
-    # # PCA 3D
-    # from sklearn.decomposition import IncrementalPCA
-    # icpa = IncrementalPCA(n_components=3, batch_size=16)
-    # icpa.fit(dist)
-    # ddd = icpa.transform(dist)
-    # xs, ys, zs = ddd[:, 0], ddd[:, 1], ddd[:, 2]
 
     return "clustering done"
 
